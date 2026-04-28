@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Lembre Já</title>
+
+<style>
+body{
+  font-family:Arial;
+  margin:0;
+  padding:20px;
+  background:linear-gradient(135deg,#0b3d2e,#1f7a4c);
+}
+
+.container{
+  max-width:650px;
+  margin:auto;
+  background:#f4fff8;
+  padding:20px;
+  border-radius:15px;
+  display:none;
+}
+
+input,select,button{
+  width:100%;
+  padding:10px;
+  margin:6px 0;
+  border-radius:8px;
+  border:1px solid #1f7a4c;
+}
+
+button{
+  background:#1f7a4c;
+  color:#fff;
+  font-weight:bold;
+}
+
+button:hover{background:#145c38;}
+
+#login{
+  position:fixed;
+  inset:0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:linear-gradient(135deg,#0b3d2e,#1f7a4c);
+}
+
+.login-box{
+  background:#fff;
+  padding:25px;
+  border-radius:12px;
+  width:320px;
+  text-align:center;
+}
+
+#alertBox{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.9);
+  color:#fff;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+  z-index:9999;
+}
+
+.status{
+  background:#dfffe0;
+  padding:8px;
+  margin:5px 0;
+  border-radius:8px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div id="login">
+  <div class="login-box">
+
+    <!-- LOGO FUNCIONANDO -->
+    <img 
+    src="https://i.imgur.com/2yaf2wb.png" 
+    style="width:120px;">
+
+    <h2>LOGIN</h2>
+
+    <input id="user" placeholder="Usuário">
+
+    <div style="position:relative;">
+      <input id="pass" type="password" placeholder="Senha">
+      <span onclick="toggleSenha()" style="position:absolute;right:10px;top:10px;cursor:pointer;">👁️</span>
+    </div>
+
+    <label>
+      <input type="checkbox" id="salvarSenha"> Salvar senha
+    </label>
+
+    <button onclick="login()">Entrar</button>
+
+    <p id="erro" style="color:red;"></p>
+
+    <hr>
+
+    <p>💬 Suporte</p>
+    <b>Master Gustavo</b>
+
+    <a href="https://t.me/goul4t7a"
+       target="_blank"
+       style="display:block;margin-top:8px;
+              padding:10px;
+              background:#1f7a4c;
+              color:#fff;
+              border-radius:8px;
+              text-decoration:none;">
+      Abrir Telegram
+    </a>
+
+  </div>
+</div>
+
+<!-- ALERTA -->
+<div id="alertBox">
+  <h1>🚨 ALERTA</h1>
+  <p id="alertMsg"></p>
+  <button onclick="pararAlerta()">PARAR</button>
+</div>
+
+<!-- APP -->
+<div class="container">
+
+<button onclick="logout()" style="background:#b71c1c;">🚪 Sair</button>
+
+<h2>LEMBRE JÁ</h2>
+
+<input id="lembreteTexto" placeholder="Lembrete">
+<input type="datetime-local" id="lembreteData">
+
+<select id="tipoAlerta">
+  <option value="alarme">🔊 Alarme</option>
+  <option value="ligacao">📞 Ligação</option>
+  <option value="voz">🎙 Voz</option>
+</select>
+
+<button onclick="criarLembrete()">Criar Lembrete</button>
+
+<hr>
+
+<h3>💧 Água</h3>
+<button onclick="ativarAgua()">Ativar Água</button>
+<button onclick="desativarAgua()" style="background:#b71c1c;">Desativar Água</button>
+
+<h3>🕒 Ponto</h3>
+<button onclick="ativarPonto()">Ativar Ponto</button>
+<button onclick="desativarPonto()" style="background:#b71c1c;">Desativar Ponto</button>
+
+<hr>
+
+<h3>📂 Lembretes</h3>
+<div id="lista"></div>
+
+</div>
+
+<script>
+
+function login(){
+  const u=user.value.trim().toLowerCase();
+  const p=pass.value.trim();
+
+  if(u==="zevo" && p==="1206"){
+    localStorage.setItem("logado","1");
+    mostrar();
+  } else {
+    erro.innerText="Login incorreto";
+  }
+}
+
+function mostrar(){
+  login.style.display="none";
+  document.querySelector(".container").style.display="block";
+}
+
+window.onload=function(){
+  if(localStorage.getItem("logado")==="1"){
+    mostrar();
+  }
+};
+
+function logout(){
+  localStorage.removeItem("logado");
+  location.reload();
+}
+
+function toggleSenha(){
+  pass.type=pass.type==="password"?"text":"password";
+}
+
+function falar(t){
+  const u=new SpeechSynthesisUtterance(t);
+  u.lang="pt-BR";
+  speechSynthesis.speak(u);
+}
+
+let som,loop;
+
+function dispararAlerta(t){
+  alertMsg.innerText=t;
+  alertBox.style.display="flex";
+
+  som=new Audio("https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg");
+  som.loop=true;
+  som.play();
+
+  loop=setInterval(()=>falar(t),4000);
+}
+
+function pararAlerta(){
+  clearInterval(loop);
+  if(som) som.pause();
+  alertBox.style.display="none";
+}
+
+let tAgua=null;
+function ativarAgua(){
+  desativarAgua();
+  falar("Água ativado");
+
+  tAgua=setInterval(()=>{
+    dispararAlerta("💧 BEBA ÁGUA");
+  },3600000);
+}
+
+function desativarAgua(){
+  clearInterval(tAgua);
+}
+
+let tPonto=null;
+function ativarPonto(){
+  desativarPonto();
+  falar("Ponto ativado");
+
+  tPonto=setInterval(()=>{
+    dispararAlerta("🕒 REGISTRE PONTO");
+  },1200000);
+}
+
+function desativarPonto(){
+  clearInterval(tPonto);
+}
+
+function criarLembrete(){
+  const txt=lembreteTexto.value;
+  const dt=new Date(lembreteData.value);
+
+  let tempo=dt-new Date();
+  if(!txt||tempo<=0)return;
+
+  setTimeout(()=>{
+    dispararAlerta(txt);
+  },tempo);
+
+  lista.innerHTML+=`<div class="status">${txt}</div>`;
+}
+
+</script>
+
+</body>
+</html>
